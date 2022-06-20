@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const tokenService = require('./token-service');
 const UserDto = require('../dtos/user-dto');
 const ApiError = require('../exceptions/api-error');
-const userModel = require('../models/user-model');
 
 class UserService {
   async registration(login, email, password, firstName, lastName) {
@@ -28,7 +27,7 @@ class UserService {
 
     const userDto = new UserDto(user);
     const tokens = tokenService.generateToken({ ...userDto });
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    await tokenService.saveToken(userDto._id, tokens.refreshToken);
 
     return {
       ...tokens,
@@ -50,7 +49,7 @@ class UserService {
     const userDto = new UserDto(user);
     const tokens = tokenService.generateToken({ ...userDto });
 
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    await tokenService.saveToken(userDto._id, tokens.refreshToken);
 
     return {
       ...tokens,
@@ -76,11 +75,11 @@ class UserService {
       throw ApiError.UnauthorizedError();
     }
 
-    const user = await UserModel.findById(userData.id);
+    const user = await UserModel.findById(userData._id);
     const userDto = new UserDto(user);
     const tokens = tokenService.generateToken({ ...userDto });
 
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    await tokenService.saveToken(userDto._id, tokens.refreshToken);
 
     return {
       ...tokens,
@@ -93,20 +92,32 @@ class UserService {
     return users;
   }
 
-  async deleteUser(id) {
+  async deleteUser(id, refreshToken) {
     await UserModel.findByIdAndDelete({ _id: id });
-
-    return 'User deleted!';
+    await tokenService.removeToken(refreshToken);
+    return refreshToken;
   }
 
   async updateUser(id, login, email, password, firstName, lastName, isLocked, isAdmin) {
-    const user = await UserModel.findByIdAndUpdate(
+    console.log(id);
+    const user = await UserModel.findById(id);
+    console.log(user);
+    if (!user) {
+      throw ApiError.BadRequest(`User was not found`);
+    }
+
+    let hashPassword = user.password;
+    if (password) {
+      const salt = bcrypt.genSaltSync();
+      hashPassword = await bcrypt.hash(password, salt);
+    }
+    await UserModel.findByIdAndUpdate(
       { _id: id },
       {
         $set: {
           login: login,
           email: email,
-          password: password,
+          password: hashPassword,
           firstName: firstName,
           lastName: lastName,
           isLocked: isLocked,
@@ -114,10 +125,6 @@ class UserService {
         },
       }
     );
-
-    if (!user) {
-      throw ApiError.BadRequest(`User with login '${login}' was not found`);
-    }
 
     const updatedUser = await UserModel.findById({ _id: id });
     const userDto = new UserDto(updatedUser);

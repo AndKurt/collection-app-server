@@ -1,7 +1,7 @@
 // Data transfer object
 
 module.exports = class UserDto {
-  id;
+  _id;
   login;
   email;
   password;
@@ -11,7 +11,7 @@ module.exports = class UserDto {
   isAdmin;
 
   constructor(model) {
-    this.id = model._id;
+    this._id = model._id;
     this.login = model.login;
     this.email = model.email;
     this.password = model.password;

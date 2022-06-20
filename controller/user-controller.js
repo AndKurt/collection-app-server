@@ -1,4 +1,5 @@
 const userService = require('../service/user-service');
+const UserModel = require('../models/user-model');
 
 class UserController {
   async registration(req, res, next) {
@@ -49,7 +50,6 @@ class UserController {
   async refresh(req, res, next) {
     try {
       const { refreshToken } = req.cookies;
-      console.log(refreshToken);
       const userData = await userService.refresh(refreshToken);
 
       res.cookie('refreshToken', userData.refreshToken, {
@@ -74,8 +74,9 @@ class UserController {
 
   async deleteUser(req, res, next) {
     try {
+      const { refreshToken } = req.cookies;
       const { id } = req.body;
-      const userData = await userService.deleteUser(id);
+      const userData = await userService.deleteUser(id, refreshToken);
 
       return res.json(userData);
     } catch (error) {
