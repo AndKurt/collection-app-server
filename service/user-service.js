@@ -92,6 +92,43 @@ class UserService {
     const users = await UserModel.find();
     return users;
   }
+
+  async deleteUser(id) {
+    await UserModel.findByIdAndDelete({ _id: id });
+
+    return 'User deleted!';
+  }
+
+  async updateUser(id, login, email, password, firstName, lastName, isLocked, isAdmin) {
+    const user = await UserModel.findByIdAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          login: login,
+          email: email,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          isLocked: isLocked,
+          isAdmin: isAdmin,
+        },
+      }
+    );
+
+    if (!user) {
+      throw ApiError.BadRequest(`User with login '${login}' was not found`);
+    }
+
+    const updatedUser = await UserModel.findById({ _id: id });
+    const userDto = new UserDto(updatedUser);
+    const tokens = tokenService.generateToken({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+    return {
+      ...tokens,
+      userDto,
+    };
+  }
 }
 
 module.exports = new UserService();

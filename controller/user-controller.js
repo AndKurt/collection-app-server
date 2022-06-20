@@ -35,7 +35,7 @@ class UserController {
 
   async logout(req, res, next) {
     try {
-      const { refreshToken } = req.cookie;
+      const { refreshToken } = req.cookies;
       const token = await userService.logout(refreshToken);
 
       res.clearCookie('refreshToken');
@@ -67,6 +67,42 @@ class UserController {
     try {
       const users = await userService.getAllUsers();
       return res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteUser(req, res, next) {
+    try {
+      const { id } = req.body;
+      const userData = await userService.deleteUser(id);
+
+      return res.json(userData);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateUser(req, res, next) {
+    try {
+      const { id, login, email, password, firstName, lastName, isLocked, isAdmin } = req.body;
+      const userData = await userService.updateUser(
+        id,
+        login,
+        email,
+        password,
+        firstName,
+        lastName,
+        isLocked,
+        isAdmin
+      );
+
+      res.cookie('refreshToken', userData.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+
+      return res.json(userData);
     } catch (error) {
       next(error);
     }
