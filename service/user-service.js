@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const tokenService = require('./token-service');
 const UserDto = require('../dtos/user-dto');
 const ApiError = require('../exceptions/api-error');
+const tokenModel = require('../models/token-model');
 
 class UserService {
   async registration(login, email, password, firstName, lastName) {
@@ -39,6 +40,10 @@ class UserService {
     const user = await UserModel.findOne({ login });
     if (!user) {
       throw ApiError.BadRequest(`User with login '${login}' was not found`);
+    }
+
+    if (user.isLocked) {
+      throw ApiError.BadRequest(`Access is denied. You have to contact the administrator`);
     }
 
     const isPassEquals = await bcrypt.compare(password, user.password);
@@ -94,14 +99,15 @@ class UserService {
 
   async deleteUser(id, refreshToken) {
     await UserModel.findByIdAndDelete({ _id: id });
-    await tokenService.removeToken(refreshToken);
-    return refreshToken;
+    const userRefreshToken = await tokenModel
+      .findOne({ user: id })
+      .then((user) => user.refreshToken);
+    await tokenService.removeToken(userRefreshToken);
+    return id;
   }
 
-  async updateUser(id, login, email, password, firstName, lastName, isLocked, isAdmin) {
-    console.log(id);
+  async updateUser(id, login, email, password, firstName, lastName, isLocked, isAdmin, currentId) {
     const user = await UserModel.findById(id);
-    console.log(user);
     if (!user) {
       throw ApiError.BadRequest(`User was not found`);
     }
@@ -126,14 +132,16 @@ class UserService {
       }
     );
 
+    const currentUser = await UserModel.findById({ _id: currentId });
     const updatedUser = await UserModel.findById({ _id: id });
-    const userDto = new UserDto(updatedUser);
+
+    const userDto = new UserDto(currentUser);
     const tokens = tokenService.generateToken({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
     return {
       ...tokens,
-      userDto,
+      user: updatedUser,
     };
   }
 }

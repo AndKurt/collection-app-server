@@ -74,9 +74,8 @@ class UserController {
 
   async deleteUser(req, res, next) {
     try {
-      const { refreshToken } = req.cookies;
       const { id } = req.body;
-      const userData = await userService.deleteUser(id, refreshToken);
+      const userData = await userService.deleteUser(id);
 
       return res.json(userData);
     } catch (error) {
@@ -86,7 +85,8 @@ class UserController {
 
   async updateUser(req, res, next) {
     try {
-      const { id, login, email, password, firstName, lastName, isLocked, isAdmin } = req.body;
+      const { id, login, email, password, firstName, lastName, isLocked, isAdmin, currentId } =
+        req.body;
       const userData = await userService.updateUser(
         id,
         login,
@@ -95,7 +95,8 @@ class UserController {
         firstName,
         lastName,
         isLocked,
-        isAdmin
+        isAdmin,
+        currentId
       );
 
       res.cookie('refreshToken', userData.refreshToken, {
