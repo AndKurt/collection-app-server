@@ -1,42 +1,38 @@
 const { Schema, model } = require('mongoose');
 
-const userSchema = new Schema({
-  login: {
+const collectionSchema = new Schema({
+  ownerId: {
     type: String,
     required: true,
     min: 4,
     max: 255,
   },
-  email: {
-    type: String,
-    required: true,
-    min: 3,
-    max: 255,
-  },
-  password: {
+  collectionTitle: {
     type: String,
     required: true,
     min: 1,
-    max: 255,
+    min: 255,
   },
-  firstName: {
+  collectionDescription: {
     type: String,
     required: true,
     min: 1,
   },
-  lastName: {
+  country: {
     type: String,
     required: true,
     min: 1,
   },
-  isLocked: {
-    type: Boolean,
-    default: false,
+  city: {
+    type: String,
+    required: true,
+    min: 1,
   },
-  isAdmin: {
-    type: Boolean,
-    default: false,
+  date: {
+    type: Array,
+    default: [Date],
+    required: true,
   },
 });
 
-module.exports = model('User', userSchema);
+module.exports = model('Collection', collectionSchema);

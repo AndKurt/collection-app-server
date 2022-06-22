@@ -43,7 +43,7 @@ class UserService {
     }
 
     if (user.isLocked) {
-      throw ApiError.BadRequest(`Access is denied. You have to contact the administrator`);
+      throw ApiError.BadRequest(`Access denied. You have to contact the administrator`);
     }
 
     const isPassEquals = await bcrypt.compare(password, user.password);
@@ -97,7 +97,7 @@ class UserService {
     return users;
   }
 
-  async deleteUser(id, refreshToken) {
+  async deleteUser(id) {
     await UserModel.findByIdAndDelete({ _id: id });
     const userRefreshToken = await tokenModel
       .findOne({ user: id })

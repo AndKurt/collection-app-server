@@ -33,9 +33,4 @@ app.use(
 app.use('/', router);
 app.use(errorMiddleware);
 
-// import Middlewares
-//app.use('/', authRoute);
-//app.use('/', userRoute);
-//app.use('/', usersRoute);
-
 app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
