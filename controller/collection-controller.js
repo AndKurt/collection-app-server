@@ -12,9 +12,11 @@ class CollectionController {
 
   async createCollection(req, res, next) {
     try {
-      const { ownerId, collectionTitle, collectionDescription, country, city, date } = req.body;
+      const { ownerId, ownerName, collectionTitle, collectionDescription, country, city, date } =
+        req.body;
       const collectionData = await collectionService.createCollection(
         ownerId,
+        ownerName,
         collectionTitle,
         collectionDescription,
         country,
@@ -46,10 +48,20 @@ class CollectionController {
 
   async updateCollection(req, res, next) {
     try {
-      const { id, ownerId, collectionTitle, collectionDescription, country, city, date } = req.body;
+      const {
+        id,
+        ownerId,
+        ownerName,
+        collectionTitle,
+        collectionDescription,
+        country,
+        city,
+        date,
+      } = req.body;
       const collectionData = await collectionService.updateCollection(
         id,
         ownerId,
+        ownerName,
         collectionTitle,
         collectionDescription,
         country,

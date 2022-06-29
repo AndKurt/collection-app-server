@@ -10,7 +10,15 @@ class CollectionService {
     return collections;
   }
 
-  async createCollection(ownerId, collectionTitle, collectionDescription, country, city, date) {
+  async createCollection(
+    ownerId,
+    ownerName,
+    collectionTitle,
+    collectionDescription,
+    country,
+    city,
+    date
+  ) {
     const user = await UserModel.findById(ownerId);
 
     if (!user) {
@@ -19,6 +27,7 @@ class CollectionService {
 
     const collection = await CollectionModel.create({
       ownerId,
+      ownerName,
       collectionTitle,
       collectionDescription,
       country,
@@ -41,7 +50,16 @@ class CollectionService {
     return id;
   }
 
-  async updateCollection(id, ownerId, collectionTitle, collectionDescription, country, city, date) {
+  async updateCollection(
+    id,
+    ownerId,
+    ownerName,
+    collectionTitle,
+    collectionDescription,
+    country,
+    city,
+    date
+  ) {
     const collection = await CollectionModel.findById(id);
     if (!collection) {
       throw ApiError.BadRequest(`Collection was not found`);
@@ -51,6 +69,7 @@ class CollectionService {
       {
         $set: {
           ownerId: ownerId,
+          ownerName: ownerName,
           collectionTitle: collectionTitle,
           collectionDescription: collectionDescription,
           country: country,

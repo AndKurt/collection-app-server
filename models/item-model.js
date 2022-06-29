@@ -1,7 +1,13 @@
 const { Schema, model } = require('mongoose');
 
-const collectionSchema = new Schema({
+const itemSchema = new Schema({
   ownerId: {
+    type: String,
+    required: true,
+    min: 4,
+    max: 255,
+  },
+  collectionId: {
     type: String,
     required: true,
     min: 4,
@@ -13,32 +19,21 @@ const collectionSchema = new Schema({
     min: 1,
     max: 255,
   },
-  collectionTitle: {
+  itemTitle: {
     type: String,
     required: true,
     min: 1,
     min: 255,
   },
-  collectionDescription: {
+  itemDescription: {
     type: String,
     required: true,
     min: 1,
   },
-  country: {
+  imgLink: {
     type: String,
-    required: true,
-    min: 1,
-  },
-  city: {
-    type: String,
-    required: true,
-    min: 1,
-  },
-  date: {
-    type: Array,
-    default: [Date],
     required: true,
   },
 });
 
-module.exports = model('Collection', collectionSchema);
+module.exports = model('Item', itemSchema);
